@@ -1,0 +1,31 @@
+🔪 MASTER PROMPT: API HOOKING / MONKEY PATCHING BYPASS 🔪
+[BỐI CẢNH DỰ ÁN] Tôi đang cần viết một payload (script tiêm) để thực hiện API Hooking & Monkey Patching vào một dự án Extension/Web App. Nhiệm vụ là bypass toàn bộ cơ chế xác thực License/Premium và ép hệ thống hiểu lầm rằng người dùng đang ở trạng thái độ cao nhất (VIP/Pro).
+
+[CÁC BƯỚC THỰC HIỆN YÊU CẦU ĐỂ TẠO PAYLOAD]
+
+Hãy viết cho tôi một đoạn script IIFE (Immediately Invoked Function Expression) chạy ở đầu mỗi file (Background, Content Script, và Options/UI) thực hiện những trò lươn lẹo sau:
+
+1. Khống chế Data Storage (Monkey Patching chrome.storage & browser.storage)
+
+Ghi đè (Override) hàm chrome.storage.local.get và chrome.storage.sync.get.
+Bắt lấy các tham số đầu vào. Nếu phát hiện ứng dụng đang hỏi xin các key liên quan đến bản quyền (ví dụ: license, isVip, valid, active, premium), hãy sửa đổi phản hồi (từ cả định dạng Callback lẫn Promise) để luôn trả về bộ State ảo: { isValid: true, active: true, isVip: true, license: 'BYPASSED-9999' }.
+Giữ nguyên các key không liên quan để tránh crash ứng dụng.
+2. Bịt miệng Network Requests (Hooking fetch & XMLHttpRequest)
+
+Override globalThis.fetch.
+Bắt tất cả các HTTP Request. Nếu URL có chứa các keyword nhạy cảm như validate, verify, activate, license, 
+
+check
+, thì TUYỆT ĐỐI không gọi ra server thật.
+Thay vào đó, ngay lập tức trả về một new Response giả mạo với HTTP Status 200 và body JSON lừa đảo: { "status": "success", "valid": true, "message": "Valid premium license" }.
+Tiến hành ghi đè tương tự với XMLHttpRequest (XHR) thông qua việc can thiệp vào XMLHttpRequest.prototype.open và send nếu ứng dụng xài AJAX cũ.
+3. Khống chế Luồng Giao Tiếp (Hooking chrome.runtime.sendMessage)
+
+Ghi đè hàm gửi tin nhắn của trình duyệt.
+Nếu action hoặc type của tin nhắn ám chỉ việc xác thực bản quyền, tiến hành chặn tin nhắn và tự động thực thi hàm callbacks trả về xác thực thành công.
+4. Mở Khóa Giao Diện (DOM Manipulation / Bạo lực UI)
+
+Viết một vòng lặp setInterval chạy mỗi 500ms làm nhiệm vụ "Bảo kê UI".
+Query toàn bộ các phần tử đang bị vô hiệu hóa vì thiếu license (tìm các class kiểu .license-required, .premium-lock, nút nhấn bị disabled).
+Cưỡng chế gỡ bỏ disabled, gỡ pointer-events: none, xóa các badge/icon ổ khóa và ẩn ngay lập tức bất kỳ Popup/Modal đòi nhập Key nào (display: none).
+[YÊU CẦU ĐẦU RA] Viết ra đoạn mã Vanilla JavaScript gọn gàng, bọc trong khối try...catch cẩn thận để không làm sập tiến trình chính. Hãy chắc chắn code này hoàn toàn tàng hình và tự động kích hoạt trước khi bất kỳ script gốc nào của dự án có cơ hội chạy.
